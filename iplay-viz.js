@@ -22,7 +22,7 @@
   .ipv .stage.mini{height:150px}
   .ipv .guide{position:absolute;left:50%;height:1px;width:38%;z-index:1;background:linear-gradient(90deg,rgba(30,42,36,.9),transparent)}
   .ipv .g-h{top:26%}.ipv .g-x{top:70%}.ipv .stage.mini .g-h{top:24%}
-  .ipv .engine{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:16px;z-index:2;
+  .ipv .engine{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:16px;z-index:5;
     background:linear-gradient(160deg,#0d1a14,#0a120e);border:1px solid #214034;box-shadow:0 0 40px rgba(10,209,127,.18);
     display:flex;align-items:center;justify-content:center}
   .ipv .stage.mini .engine{width:62px;height:62px}
@@ -296,12 +296,12 @@
     var labels = panel.querySelectorAll('.panel-label');
     if (labels.length < 2) return;
     var a = labels[0], b = labels[1];
-    var cardA = a.parentElement, cardB = b.parentElement, grid = cardA.parentElement;
-    var bodyA = cardA.querySelector('.card-body'), bodyB = cardB.querySelector('.card-body');
+    function bodyFor(lab) { var p = lab; for (var k = 0; k < 4 && p && p !== panel; k++) { var cb = p.querySelector('.card-body'); if (cb) return cb; p = p.parentElement; } return null; }
+    var bodyA = bodyFor(a), bodyB = bodyFor(b);
     function side(cls, lab, body) {
       var s = document.createElement('div'); s.className = 'sd ' + cls;
       var cap = document.createElement('div'); cap.className = 'cap';
-      var dot = document.createElement('i'); cap.appendChild(dot);
+      cap.appendChild(document.createElement('i'));
       cap.appendChild(document.createTextNode(lab ? lab.textContent : ''));
       var bd = document.createElement('p'); bd.className = 'bd';
       bd.textContent = body ? body.textContent : '';
@@ -312,13 +312,19 @@
     wrap.appendChild(side('you', b, bodyB));
     var seam = document.createElement('div'); seam.className = 'ipv-seam'; wrap.appendChild(seam);
     var node = document.createElement('div'); node.className = 'ipv-node'; node.textContent = '\u27F7'; wrap.appendChild(node);
-    if (grid === cardB.parentElement && grid.children.length === 2) {
-      grid.parentNode.insertBefore(wrap, grid); grid.style.display = 'none';
-    } else {
-      cardA.parentNode.insertBefore(wrap, cardA); cardA.style.display = 'none'; cardB.style.display = 'none';
+    var aAnc = []; for (var x = a; x && x !== panel; x = x.parentElement) aAnc.push(x);
+    var cardA = null, cardB = null;
+    for (var y = b; y && y !== panel; y = y.parentElement) {
+      var pi = aAnc.indexOf(y.parentElement);
+      if (pi >= 0) { cardB = y; cardA = aAnc[pi - 1] || aAnc[0]; break; }
     }
+    if (cardA && cardB && cardA.parentNode) {
+      cardA.parentNode.insertBefore(wrap, cardA);
+      cardA.style.display = 'none'; cardB.style.display = 'none';
+    } else { (a.parentElement || panel).appendChild(wrap); }
     whenSeen(wrap, function () { wrap.classList.add('in'); });
   }
+
 
   function stepsViz(panel) {
     var seq = STEP_MAP[panel.getAttribute('data-steps')]; if (!seq) return;
