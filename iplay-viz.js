@@ -1,6 +1,6 @@
 /* i-play.io — Bucket B visualization bundle
  * Injects animated visuals into any element carrying a [data-viz] attribute:
- *   routing | stress | ecosystem | routing-mini | downline
+ *   routing | stress | ecosystem | routing-mini | downline | split | steps
  * Pure Felt palette. Illustrative motion only — no live data, no thresholds.
  * Content-card panels (with a .card-body) keep their copy; the visual is appended below.
  * Pure-slot panels are replaced by the visual.
@@ -98,7 +98,30 @@
   .ipv .tfoot .v{font:600 18px Inter;color:#0AD17F;font-variant-numeric:tabular-nums}
   .ipv .models{font-size:10.5px;color:#6B746F;margin-top:4px}
   @media(max-width:720px){.ipv .metrics{grid-template-columns:1fr}.ipv .stats{grid-template-columns:repeat(2,1fr)}}
-  `;
+  
+  /* ---- split (responsibility division) ---- */
+  [data-viz="split"] .ipv-split{display:grid;grid-template-columns:1fr 1fr;position:relative;background:#0A0E0C;border:1px solid #1E2A24;border-radius:14px;overflow:hidden;margin-top:6px}
+  [data-viz="split"] .ipv-split .sd{padding:30px 32px}
+  [data-viz="split"] .ipv-split .sd+.sd{border-left:1px solid #1E2A24}
+  [data-viz="split"] .ipv-split .cap{display:flex;align-items:center;gap:9px;font:600 11px/1 Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;margin:0 0 15px}
+  [data-viz="split"] .ipv-split .we .cap{color:#0AD17F}
+  [data-viz="split"] .ipv-split .you .cap{color:#fff}
+  [data-viz="split"] .ipv-split .cap i{width:7px;height:7px;border-radius:50%;display:inline-block;flex:0 0 auto}
+  [data-viz="split"] .ipv-split .we .cap i{background:#0AD17F;box-shadow:0 0 10px #0AD17F}
+  [data-viz="split"] .ipv-split .you .cap i{background:#6B746F}
+  [data-viz="split"] .ipv-split .bd{font:400 15px/1.55 Inter,system-ui,sans-serif;color:#A8B4AE;margin:0;max-width:42ch;opacity:0;transform:translateX(var(--fx));transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1)}
+  [data-viz="split"] .ipv-split .we .bd{--fx:-16px}
+  [data-viz="split"] .ipv-split .you .bd{--fx:16px}
+  [data-viz="split"] .ipv-split.in .bd{opacity:1;transform:translateX(0)}
+  [data-viz="split"] .ipv-seam{position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);z-index:2;background:linear-gradient(180deg,transparent,#1E2A24 12%,#1E2A24 88%,transparent)}
+  [data-viz="split"] .ipv-seam::after{content:"";position:absolute;left:0;top:-38px;width:1px;height:38px;background:linear-gradient(180deg,transparent,#0AD17F,transparent);animation:ipvRun 3.4s linear infinite}
+  @keyframes ipvRun{0%{top:-38px}100%{top:100%}}
+  [data-viz="split"] .ipv-node{position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;background:#121815;border:1px solid #1E2A24;z-index:3;display:flex;align-items:center;justify-content:center;font:600 13px Inter;color:#6B746F}
+  @media(max-width:760px){[data-viz="split"] .ipv-split{grid-template-columns:1fr}[data-viz="split"] .ipv-split .sd+.sd{border-left:0;border-top:1px solid #1E2A24}[data-viz="split"] .ipv-seam,[data-viz="split"] .ipv-node{display:none}[data-viz="split"] .ipv-split .bd{--fx:0;max-width:none}}
+  /* ---- step-card icons ---- */
+  [data-viz="steps"] .ipv-ic{width:46px;height:46px;border-radius:11px;background:#121815;border:1px solid #1E2A24;display:flex;align-items:center;justify-content:center;color:#069C63;margin:0 0 16px;opacity:0;transform:translateY(8px);transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1)}
+  [data-viz="steps"] .ipv-ic.in{opacity:1;transform:translateY(0)}
+  [data-viz="steps"] .ipv-ic svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}`;
 
   function injectCSS() {
     if (document.getElementById('ipv-css')) return;
@@ -250,7 +273,68 @@
     });
   }
 
-  var BUILD = { routing: function (p) { routing(p, false); }, 'routing-mini': function (p) { routing(p, true); }, stress: stress, ecosystem: ecosystem, downline: downline };
+  var STEP_ICONS = {
+    calendar:'<rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M10.5 14l1.5 1.5L15 12.5"/>',
+    sliders:'<path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/>',
+    plug:'<path d="M9 3v5M15 3v5M7 8h10v3a5 5 0 0 1-10 0V8Z"/><path d="M12 16v5"/>',
+    rocket:'<path d="M12 3c3 1.5 5 5 5 9l-2.5 2.5h-5L7 12c0-4 2-7.5 5-9Z"/><circle cx="12" cy="9.5" r="1.6"/><path d="M9.5 17c-1 1-1.3 3-1.3 3s2-.3 3-1.3M14.5 17c1 1 1.3 3 1.3 3s-2-.3-3-1.3"/>',
+    magnet:'<path d="M6 4v7a6 6 0 0 0 12 0V4"/><path d="M6 4h4v7M18 4h-4v7"/>',
+    convert:'<path d="M4 5h16l-6.2 7.5V19l-3.6-1.8v-4.7L4 5Z"/>',
+    crown:'<path d="M4 8l3.5 3L12 5l4.5 6L20 8l-1.5 9h-13L4 8Z"/><path d="M5.5 20h13"/>',
+    browse:'<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/>',
+    takeside:'<path d="M12 5v14"/><path d="M9 9l-3 3 3 3"/><path d="M15 9l3 3-3 3"/>',
+    trend:'<path d="M4 20V4M4 20h16"/><path d="M7 15l3.5-4 3 2.5L20 8"/><path d="M20 8h-3M20 8v3"/>',
+    check:'<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4L16 9.5"/>'
+  };
+  var STEP_MAP = {
+    'how-it-works': ['calendar', 'sliders', 'plug', 'rocket'],
+    'player-lifecycle': ['magnet', 'convert', 'crown'],
+    'predictions': ['browse', 'takeside', 'trend', 'check']
+  };
+
+  function splitViz(panel) {
+    var labels = panel.querySelectorAll('.panel-label');
+    if (labels.length < 2) return;
+    var a = labels[0], b = labels[1];
+    var cardA = a.parentElement, cardB = b.parentElement, grid = cardA.parentElement;
+    var bodyA = cardA.querySelector('.card-body'), bodyB = cardB.querySelector('.card-body');
+    function side(cls, lab, body) {
+      var s = document.createElement('div'); s.className = 'sd ' + cls;
+      var cap = document.createElement('div'); cap.className = 'cap';
+      var dot = document.createElement('i'); cap.appendChild(dot);
+      cap.appendChild(document.createTextNode(lab ? lab.textContent : ''));
+      var bd = document.createElement('p'); bd.className = 'bd';
+      bd.textContent = body ? body.textContent : '';
+      s.appendChild(cap); s.appendChild(bd); return s;
+    }
+    var wrap = document.createElement('div'); wrap.className = 'ipv ipv-split';
+    wrap.appendChild(side('we', a, bodyA));
+    wrap.appendChild(side('you', b, bodyB));
+    var seam = document.createElement('div'); seam.className = 'ipv-seam'; wrap.appendChild(seam);
+    var node = document.createElement('div'); node.className = 'ipv-node'; node.textContent = '\u27F7'; wrap.appendChild(node);
+    if (grid === cardB.parentElement && grid.children.length === 2) {
+      grid.parentNode.insertBefore(wrap, grid); grid.style.display = 'none';
+    } else {
+      cardA.parentNode.insertBefore(wrap, cardA); cardA.style.display = 'none'; cardB.style.display = 'none';
+    }
+    whenSeen(wrap, function () { wrap.classList.add('in'); });
+  }
+
+  function stepsViz(panel) {
+    var seq = STEP_MAP[panel.getAttribute('data-steps')]; if (!seq) return;
+    var labels = panel.querySelectorAll('.panel-label'), cards = [];
+    for (var i = 0; i < labels.length; i++) { if (/^0?\d$/.test((labels[i].textContent || '').trim())) cards.push(labels[i]); }
+    var tiles = [];
+    cards.forEach(function (lab, i) {
+      var name = seq[i]; if (!name || !STEP_ICONS[name]) return;
+      var ic = document.createElement('div'); ic.className = 'ipv-ic';
+      ic.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' + STEP_ICONS[name] + '</svg>';
+      lab.parentElement.insertBefore(ic, lab); tiles.push(ic);
+    });
+    whenSeen(panel, function () { tiles.forEach(function (t, i) { setTimeout(function () { t.classList.add('in'); }, 90 * i); }); });
+  }
+
+  var BUILD = { routing: function (p) { routing(p, false); }, 'routing-mini': function (p) { routing(p, true); }, stress: stress, ecosystem: ecosystem, downline: downline, split: splitViz, steps: stepsViz };
 
   function run() {
     injectCSS();
