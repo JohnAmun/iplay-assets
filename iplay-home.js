@@ -26,8 +26,9 @@
   /* ============================ STYLES ============================ */
   var CSS = "\
 :root{--ip-bg0:#000;--ip-bg1:#0A0E0C;--ip-bg2:#121815;--ip-bd:#1E2A24;--ip-br:#069C63;--ip-brh:#0AD17F;--ip-t1:#fff;--ip-t2:#A8B4AE;--ip-t3:#6B746F}\
-html{overflow-x:clip}\
+html,body{overflow-x:clip!important}\
 [data-iplay=hero] .glow{max-width:100vw}\
+[data-iplay] .ipg{max-width:100%}\
 .iph-rev{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}\
 .iph-in{opacity:1;transform:none}\
 @media (prefers-reduced-motion:reduce){.iph-rev{opacity:1;transform:none;transition:none}}\
