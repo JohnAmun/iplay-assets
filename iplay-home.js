@@ -78,6 +78,7 @@
 .iph-float img{display:block}\
 .iph-float.iph-rev{transform:translateY(26px) scale(.96)}\
 .iph-float.iph-in{transform:none}\
+@media(max-width:767px){.iph-float,.iph-tree{display:none!important}}\
 /* ---- CHAPTER unify (predictions + engine) ---- */\
 [data-iplay-chapter=predictions]{background:var(--ip-bg1)!important;border-top:0!important;position:relative}\
 [data-iplay=predictions]{padding-bottom:30px!important}\
@@ -261,7 +262,19 @@
 
   /* ============================ 4. SCREENS (tabs + hover-scroll) ============================ */
   safe("screens", function () {
-    var sc = sect("screens"); if (!sc || sc.__iph) return; sc.__iph = true;
+    var sc = sect("screens"); if (!sc || sc.__iph) return;
+    var tries = 0;
+    (function waitImg() {
+      var panel0 = q(".panel", sc);
+      var img0 = panel0 ? panel0.querySelector("img") : null;     // built async by iplayshotfillv2
+      if ((!panel0 || !img0) && tries++ < 60) return setTimeout(waitImg, 150);
+      if (!panel0 || !img0) return;
+      sc.__iph = true;
+      try { initScreens(sc); } catch (e) { (console.warn || console.log)("[iplay-home] screens failed", e); }
+    })();
+  });
+
+  function initScreens(sc) {
     var chips = qa(".chip, .chip-active", sc);
     var panel = q(".panel", sc); if (!panel) return;
 
@@ -287,6 +300,7 @@
       var mimg = document.createElement("img"); mimg.src = IMG + "home-m.png"; mimg.alt = "mobile frontend"; mimg.loading = "lazy";
       peer.appendChild(mimg); wrap.appendChild(peer);
       sc.__peer = mimg;
+      var sfMobile = panel.querySelector(".iph"); if (sfMobile) sfMobile.style.display = "none"; // hide shotfill inline mobile; enlarged peer is the mobile
     }
 
     // hover-scroll inside frame, release at bounds
@@ -318,7 +332,7 @@
     // initialize to first/active
     var act = qa(".chip-active", sc)[0] || chips[0];
     if (act) activate(act.textContent.trim());
-  });
+  }
 
   /* ============================ 5. PREDICTIONS (layered crops) ============================ */
   safe("predictions", function () {
