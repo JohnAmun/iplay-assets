@@ -127,12 +127,13 @@
         g.addColorStop(0, "rgba(6,156,99,.06)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(x0 + lw * i, 0, lw, h);
       });
       x.globalAlpha = intro;
-      casinoLane(x0 + lw * .5, h, k, dt);
+      casinoLane(w * .18, h, k, dt);
       sportLane(x0 + lw * 1.5, lw, h, k);
       predictLane(x0 + lw * 2.5, lw, h, k, dt);
       x.globalAlpha = intro * .6; x.font = "700 11px Inter,sans-serif"; x.fillStyle = "#6B746F"; x.textAlign = "center";
       [["CASINO", "slots · roulette · table"], ["SPORTSBOOK", "fixed-odds"], ["PREDICTIONS", "markets"]].forEach(function (p, i) {
-        x.fillText(p[0], x0 + lw * (i + .5), h - 22); x.font = "500 9px Inter,sans-serif"; x.fillText(p[1], x0 + lw * (i + .5), h - 10); x.font = "700 11px Inter,sans-serif";
+        var lx = i === 0 ? w * .18 : x0 + lw * (i + .5);
+        x.fillText(p[0], lx, h - 22); x.font = "500 9px Inter,sans-serif"; x.fillText(p[1], lx, h - 10); x.font = "700 11px Inter,sans-serif";
       });
       x.globalAlpha = 1;
       if (running) raf = requestAnimationFrame(frame);
