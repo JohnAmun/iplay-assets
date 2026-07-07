@@ -64,20 +64,42 @@
         x.globalAlpha = 1; x.restore();
       });
       x.textBaseline = "alphabetic";
-      var wy = h * 0.66, R = Math.min(70, h * 0.1);
-      wheel += dt * 0.5; ball -= dt * 1.7;
-      var segs = 16;
-      for (var s = 0; s < segs; s++) {
-        var a0 = wheel + s / segs * 6.283, a1 = wheel + (s + 1) / segs * 6.283;
+      var wy = h * 0.66, R = Math.min(72, h * 0.11);
+      wheel += dt * 0.45; ball -= dt * 1.7;
+      var TAU = 6.28318, POCK = 18, inner = R * 0.58, cone = R * 0.34;
+      // base disc
+      x.fillStyle = "#0A0E0C"; x.beginPath(); x.arc(cx, wy, R, 0, TAU); x.fill();
+      // pocket wedges: alternating felt + 3 evenly-spaced green "zero" pockets
+      for (var s = 0; s < POCK; s++) {
+        var a0 = wheel + s / POCK * TAU, a1 = a0 + TAU / POCK;
         x.beginPath(); x.moveTo(cx, wy); x.arc(cx, wy, R, a0, a1); x.closePath();
-        x.fillStyle = (s % 2) ? "#0a140e" : "#13231b"; if (s % 5 === 0) x.fillStyle = "#069C63"; x.fill();
+        x.fillStyle = (s % 6 === 0) ? "#069C63" : ((s % 2) ? "#1E2A24" : "#0b100d");
+        x.fill();
       }
-      x.strokeStyle = "rgba(30,42,36,1)"; x.lineWidth = 1.5; x.beginPath(); x.arc(cx, wy, R, 0, 7); x.stroke();
-      x.strokeStyle = "rgba(10,209,127,.3)"; x.beginPath(); x.arc(cx, wy, R * 0.62, 0, 7); x.stroke();
-      x.fillStyle = "#16201a"; x.beginPath(); x.arc(cx, wy, R * 0.3, 0, 7); x.fill();
-      x.strokeStyle = "rgba(10,209,127,.4)"; x.stroke();
-      var bx = cx + Math.cos(ball) * R * 0.82, by = wy + Math.sin(ball) * R * 0.82;
-      x.fillStyle = "#fff"; x.beginPath(); x.arc(bx, by, 3, 0, 7); x.fill();
+      // clear wedge tips -> leaves a clean pocket ring between inner..R
+      x.fillStyle = "#0b0f0d"; x.beginPath(); x.arc(cx, wy, inner, 0, TAU); x.fill();
+      // frets: radial dividers across the pocket ring
+      x.strokeStyle = "rgba(168,180,174,.30)"; x.lineWidth = 1;
+      for (var f = 0; f < POCK; f++) {
+        var fa = wheel + f / POCK * TAU, fc = Math.cos(fa), fs = Math.sin(fa);
+        x.beginPath(); x.moveTo(cx + fc * inner, wy + fs * inner); x.lineTo(cx + fc * R, wy + fs * R); x.stroke();
+      }
+      // rim rings
+      x.strokeStyle = "rgba(30,42,36,1)"; x.lineWidth = 2; x.beginPath(); x.arc(cx, wy, R, 0, TAU); x.stroke();
+      x.strokeStyle = "rgba(10,209,127,.35)"; x.lineWidth = 1; x.beginPath(); x.arc(cx, wy, inner, 0, TAU); x.stroke();
+      // cone + spokes (turret)
+      x.fillStyle = "#121815"; x.beginPath(); x.arc(cx, wy, cone, 0, TAU); x.fill();
+      x.strokeStyle = "rgba(10,209,127,.30)"; x.lineWidth = 1;
+      for (var sp = 0; sp < 8; sp++) {
+        var sa = wheel + sp / 8 * TAU;
+        x.beginPath(); x.moveTo(cx, wy); x.lineTo(cx + Math.cos(sa) * (inner - 2), wy + Math.sin(sa) * (inner - 2)); x.stroke();
+      }
+      // hub
+      x.fillStyle = "#16201a"; x.beginPath(); x.arc(cx, wy, cone * 0.42, 0, TAU); x.fill();
+      x.strokeStyle = "rgba(10,209,127,.5)"; x.beginPath(); x.arc(cx, wy, cone * 0.42, 0, TAU); x.stroke();
+      // ball riding the pocket track (counter-rotating)
+      var br = (R + inner) / 2, bx = cx + Math.cos(ball) * br, by = wy + Math.sin(ball) * br;
+      x.fillStyle = "#fff"; x.beginPath(); x.arc(bx, by, 2.6, 0, TAU); x.fill();
     }
 
     function sportLane(cx, lw, h, k) {
